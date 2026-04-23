@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📧 Campañas Email - Braven Studio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #12182a 0%, #1a2554 100%);
+      color: white;
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 3rem 2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #12182a;
+    }
+
+    .dashboard-wrapper {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .button-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .btn-launch {
+      padding: 1.2rem 2rem;
+      background: linear-gradient(135deg, #ea6969 0%, #d94d4d 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(234, 105, 105, 0.3);
+    }
+
+    .btn-launch:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(234, 105, 105, 0.4);
+    }
+
+    .btn-launch:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+      padding: 2rem;
+      border-radius: 8px;
+      border-left: 4px solid #ea6969;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ea6969;
+    }
+
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .campaign-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+
+    .campaign-card:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      border-color: #ea6969;
+      transform: translateY(-2px);
+    }
+
+    .campaign-card h3 {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      color: #12182a;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .stat-value-inner {
+      font-weight: 600;
+      color: #ea6969;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+    }
+
+    .error {
+      background: #fee;
+      color: #c00;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .content {
+        padding: 1.5rem;
+      }
+
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .campaigns-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📧 Campañas Email</h1>
+      <p>Automatización Braven Studio</p>
+    </div>
+
+    <div class="content">
+      <div class="button-wrapper">
+        <button id="launch-btn" class="btn-launch">🚀 LANZAR CAMPAÑA</button>
+      </div>
+
+      <div id="error-container"></div>
+
+      <h2 class="section-title">📊 Métricas</h2>
+      <div id="metrics" class="metrics-grid">
+        <div class="loading">Cargando métricas...</div>
+      </div>
+
+      <h2 class="section-title">📧 Campañas</h2>
+      <div id="campaigns" class="campaigns-grid">
+        <div class="loading">Cargando campañas...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class EmailDashboard {
+      constructor() {
+        this.supabaseUrl = 'https://qkguauyaetqwxvomxjbh.supabase.co'
+        this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrZ3VhdXllZXRxd3h2b214amJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTczNTAw MTAsImV4cCI6MjAxMzUwMDEwfQ.vN_KUmq-Wd_5jL5qL9fV3kL5qL9fV3kL5qL9fV3kL5I'
+        this.netlifyFunctionUrl = 'https://webbraven.netlify.app/.netlify/functions/campaign-launcher'
+        this.isLaunching = false
+
+        document.getElementById('launch-btn').addEventListener('click', () => this.launchCampaign())
+        this.loadMetrics()
+        setInterval(() => this.loadMetrics(), 30000)
+      }
+
+      async loadMetrics() {
+        try {
+          const response = await fetch(
+            `${this.supabaseUrl}/rest/v1/email_campaign_summary`,
+            {
+              headers: {
+                'apikey': this.supabaseKey,
+                'Authorization': `Bearer ${this.supabaseKey}`
+              }
+            }
+          )
+
+          if (!response.ok) throw new Error('Error cargando métricas')
+          
+          const data = await response.json()
+          if (data.length > 0) {
+            this.renderMetrics(data[0])
+            this.renderCampaigns(data[0])
+          }
+        } catch (error) {
+          console.error('Error:', error)
+          document.getElementById('metrics').innerHTML = '<div class="error">Error cargando datos</div>'
+        }
+      }
+
+      renderMetrics(summary) {
+        const html = `
+          <div class="metric-card">
+            <div class="metric-label">Total Leads</div>
+            <div class="metric-value">${summary.total_leads || 0}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">🔥 HOT</div>
+            <div class="metric-value">${summary.hot_leads || 0}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">🟡 CALIENTE</div>
+            <div class="metric-value">${summary.caliente_leads || 0}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">🔵 TIBIO</div>
+            <div class="metric-value">${summary.tibio_leads || 0}</div>
+          </div>
+        `
+        document.getElementById('metrics').innerHTML = html
+      }
+
+      renderCampaigns(summary) {
+        const percent = (part, total) => total > 0 ? Math.round((part / total) * 100) : 0
+        
+        const html = `
+          <div class="campaign-card">
+            <h3>Campaign 1: Presentación</h3>
+            <div class="stat-row">
+              <span>Enviados:</span>
+              <span class="stat-value-inner">${summary.campaign_1_sent || 0}</span>
+            </div>
+            <div class="stat-row">
+              <span>Abiertos:</span>
+              <span class="stat-value-inner">${summary.campaign_1_opened || 0} (${percent(summary.campaign_1_opened, summary.campaign_1_sent)}%)</span>
+            </div>
+            <div class="stat-row">
+              <span>Clicks:</span>
+              <span class="stat-value-inner">${summary.campaign_1_clicked || 0} (${percent(summary.campaign_1_clicked, summary.campaign_1_sent)}%)</span>
+            </div>
+          </div>
+
+          <div class="campaign-card">
+            <h3>Campaign 2: Caso de Uso</h3>
+            <div class="stat-row">
+              <span>Enviados:</span>
+              <span class="stat-value-inner">${summary.campaign_2_sent || 0}</span>
+            </div>
+            <div class="stat-row">
+              <span>Abiertos:</span>
+              <span class="stat-value-inner">${summary.campaign_2_opened || 0} (${percent(summary.campaign_2_opened, summary.campaign_2_sent)}%)</span>
+            </div>
+            <div class="stat-row">
+              <span>Clicks:</span>
+              <span class="stat-value-inner">${summary.campaign_2_clicked || 0} (${percent(summary.campaign_2_clicked, summary.campaign_2_sent)}%)</span>
+            </div>
+          </div>
+
+          <div class="campaign-card">
+            <h3>Campaign 3: Última Oportunidad</h3>
+            <div class="stat-row">
+              <span>Enviados:</span>
+              <span class="stat-value-inner">${summary.campaign_3_sent || 0}</span>
+            </div>
+            <div class="stat-row">
+              <span>Abiertos:</span>
+              <span class="stat-value-inner">${summary.campaign_3_opened || 0} (${percent(summary.campaign_3_opened, summary.campaign_3_sent)}%)</span>
+            </div>
+            <div class="stat-row">
+              <span>Clicks:</span>
+              <span class="stat-value-inner">${summary.campaign_3_clicked || 0} (${percent(summary.campaign_3_clicked, summary.campaign_3_sent)}%)</span>
+            </div>
+          </div>
+        `
+        document.getElementById('campaigns').innerHTML = html
+      }
+
+      async launchCampaign() {
+        if (this.isLaunching) return
+
+        if (!confirm('¿Estás seguro de que querés lanzar la campaña?\n\nSe enviarán 50 emails automáticamente.')) {
+          return
+        }
+
+        this.isLaunching = true
+        const btn = document.getElementById('launch-btn')
+        btn.disabled = true
+        btn.textContent = '🔄 Lanzando...'
+
+        try {
+          const response = await fetch(this.netlifyFunctionUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'launch-campaign' })
+          })
+
+          const result = await response.json()
+
+          if (!response.ok) {
+            throw new Error(result.error || 'Error lanzando campaña')
+          }
+
+          alert('✅ ¡Campaña lanzada exitosamente!\n\n📧 Campaign 1: Enviada AHORA\n📅 Campaign 2: En 3 días\n📅 Campaign 3: En 7 días')
+          
+          setTimeout(() => this.loadMetrics(), 2000)
+        } catch (error) {
+          alert('❌ Error: ' + error.message)
+        } finally {
+          this.isLaunching = false
+          btn.disabled = false
+          btn.textContent = '🚀 LANZAR CAMPAÑA'
+        }
+      }
+    }
+
+    // Inicializar
+    new EmailDashboard()
+  </script>
+</body>
+</html>
