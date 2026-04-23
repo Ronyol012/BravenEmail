@@ -1,7 +1,7 @@
 # File: netlify.toml
 
 [build]
-  command = "echo 'No build needed'"
+  command = "npm install"
   functions = "netlify/functions"
   publish = "."
 
