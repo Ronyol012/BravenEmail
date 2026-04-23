@@ -344,7 +344,7 @@ async function createCampaign3() {
 async function setupWebhooks() {
   console.log('🔗 Configurando webhooks...');
   
-  const webhookUrl = `${process.env.DEPLOY_URL}/.netlify/functions/mailchimp-webhook`;
+  const webhookUrl = `${process.env.NETLIFY_SITE_URL || 'https://webbraven.netlify.app'}/.netlify/functions/mailchimp-webhook`;
   
   const webhookData = {
     url: webhookUrl,
