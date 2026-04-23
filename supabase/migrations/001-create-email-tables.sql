@@ -1,4 +1,4 @@
--- File: supabase/migrations/001-create-email-tables.sql
+-- File: supabase/migrations/001-create-email-tables.sql (VERSIÓN CORREGIDA)
 -- Ejecutar esto en la consola SQL de Supabase
 
 -- Tabla principal: Leads y su estado
@@ -111,15 +111,15 @@ SELECT
   SUM(CASE WHEN temperatura = 'FRIO' THEN 1 ELSE 0 END) as frio_leads
 FROM email_campaigns;
 
--- Vista: Engagement rate por campaña
+-- Vista: Engagement rate por campaña (SIN ROUND - dejamos decimales)
 CREATE OR REPLACE VIEW email_engagement_rates AS
 SELECT 
   'Campaign 1' as campaign,
   COUNT(*) as sent,
   SUM(CASE WHEN campaign_1_opened THEN 1 ELSE 0 END) as opened,
   SUM(CASE WHEN campaign_1_clicked THEN 1 ELSE 0 END) as clicked,
-  ROUND((SUM(CASE WHEN campaign_1_opened THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2) as open_rate,
-  ROUND((SUM(CASE WHEN campaign_1_clicked THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2) as click_rate
+  (SUM(CASE WHEN campaign_1_opened THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100 as open_rate,
+  (SUM(CASE WHEN campaign_1_clicked THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100 as click_rate
 FROM email_campaigns
 WHERE campaign_1_sent = TRUE
 
@@ -130,8 +130,8 @@ SELECT
   COUNT(*),
   SUM(CASE WHEN campaign_2_opened THEN 1 ELSE 0 END),
   SUM(CASE WHEN campaign_2_clicked THEN 1 ELSE 0 END),
-  ROUND((SUM(CASE WHEN campaign_2_opened THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2),
-  ROUND((SUM(CASE WHEN campaign_2_clicked THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2)
+  (SUM(CASE WHEN campaign_2_opened THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100,
+  (SUM(CASE WHEN campaign_2_clicked THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100
 FROM email_campaigns
 WHERE campaign_2_sent = TRUE
 
@@ -142,7 +142,7 @@ SELECT
   COUNT(*),
   SUM(CASE WHEN campaign_3_opened THEN 1 ELSE 0 END),
   SUM(CASE WHEN campaign_3_clicked THEN 1 ELSE 0 END),
-  ROUND((SUM(CASE WHEN campaign_3_opened THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2),
-  ROUND((SUM(CASE WHEN campaign_3_clicked THEN 1 ELSE 0 END)::float / COUNT(*)) * 100, 2)
+  (SUM(CASE WHEN campaign_3_opened THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100,
+  (SUM(CASE WHEN campaign_3_clicked THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100
 FROM email_campaigns
 WHERE campaign_3_sent = TRUE;
