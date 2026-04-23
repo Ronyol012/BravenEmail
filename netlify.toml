@@ -1,22 +1,6 @@
-# File: netlify.toml
+# Netlify configuration for Braven Email Automation
+# Only Netlify Functions, no build needed
 
-[build]
-  command = "npm install"
-  functions = "netlify/functions"
-  publish = "."
-
-[build.environment]
-  NODE_VERSION = "18"
-
-# Funciones
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
-
-# Configuración de headers
-[[headers]]
-  for = "/.netlify/functions/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
-    Content-Type = "application/json"
