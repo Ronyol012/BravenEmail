@@ -1,33 +1,17 @@
 # File: netlify.toml
 
 [build]
-  command = "npm run build"
+  command = "echo 'No build needed'"
   functions = "netlify/functions"
-  publish = "dist"
+  publish = "."
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_VERSION = "9"
-
-# Variables de entorno (configurar en Netlify UI)
-[env]
-  [env.production]
-    NODE_ENV = "production"
-
-# Redirects
-[[redirects]]
-  from = "/.netlify/functions/:name"
-  to = "/.netlify/functions/:name"
-  status = 200
 
 # Funciones
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
-
-# Eventos
-[[plugins]]
-  package = "@netlify/plugin-functions-python"
 
 # Configuración de headers
 [[headers]]
